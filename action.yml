@@ -1,5 +1,5 @@
 name: 'Get Release Info'
-description: 'Get a latest release or by tag, including draft releases'
+description: 'Get the meta data of the latest release or by id or tag, including draft releases.'
 author: 'Simon Ihmig'
 inputs:
   token:
