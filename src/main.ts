@@ -2,7 +2,7 @@ import { setFailed, setOutput, warning } from '@actions/core';
 import { getOctokit } from '@actions/github';
 import { getInputs, mapResponseToReleaseOutput } from './utils';
 import { Release } from './types';
-import { getLatestRelease, getReleaseByTagName } from './release';
+import { getDraftReleaseByTagName, getLatestRelease, getReleaseByTagName } from './release';
 
 async function run(): Promise<void> {
   try {
@@ -23,7 +23,7 @@ async function run(): Promise<void> {
       release = await getLatestRelease(octokit, owner, repo);
     } else if (tag_name) {
       if (draft) {
-        throw new Error('not supported yet');
+        release = await getDraftReleaseByTagName(octokit, owner, repo, tag_name);
       } else {
         release = await getReleaseByTagName(octokit, owner, repo, tag_name);
       }

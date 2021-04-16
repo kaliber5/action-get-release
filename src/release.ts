@@ -18,3 +18,25 @@ export async function getReleaseByTagName(github: Octokit, owner: string, repo: 
     throw new Error(`Could not find release for tag ${tag}.`);
   }
 }
+
+export async function getDraftReleaseByTagName(
+  github: Octokit,
+  owner: string,
+  repo: string,
+  tag: string
+): Promise<Release> {
+  try {
+    debug(`Trying to fetch draft release for tag ${tag}`);
+    const release = (await github.repos.listReleases({ owner, repo })).data.find(
+      (listItem) => listItem.draft === true && listItem.tag_name === tag
+    );
+
+    if (!release) {
+      throw new Error();
+    }
+
+    return release;
+  } catch (e) {
+    throw new Error(`Could not find release for tag ${tag}.`);
+  }
+}

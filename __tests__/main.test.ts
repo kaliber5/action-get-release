@@ -63,4 +63,30 @@ describe('main', function () {
       JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/output/tag.json'), { encoding: 'utf-8' }))
     );
   });
+
+  test('can fetch draft release by tag', async () => {
+    const mocks = {
+      github: [
+        {
+          method: 'GET',
+          uri: '/repos/foo/bar/releases',
+          file: path.join(__dirname, 'fixtures/api/list.json'),
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+          },
+        },
+      ],
+    };
+
+    const { out, status } = await run(script, {
+      env: { ...env, INPUT_TAG_NAME: 'v1.1.0', INPUT_DRAFT: 'true' },
+      mocks,
+    });
+    const output = parseOutput(out);
+
+    expect(status).toEqual(0);
+    expect(output).toEqual(
+      JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/output/draft.json'), { encoding: 'utf-8' }))
+    );
+  });
 });

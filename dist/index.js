@@ -38,7 +38,7 @@ function run() {
             }
             else if (tag_name) {
                 if (draft) {
-                    throw new Error('not supported yet');
+                    release = yield release_1.getDraftReleaseByTagName(octokit, owner, repo, tag_name);
                 }
                 else {
                     release = yield release_1.getReleaseByTagName(octokit, owner, repo, tag_name);
@@ -77,7 +77,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getReleaseByTagName = exports.getLatestRelease = void 0;
+exports.getDraftReleaseByTagName = exports.getReleaseByTagName = exports.getLatestRelease = void 0;
 const core_1 = __webpack_require__(186);
 function getLatestRelease(github, owner, repo) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -103,6 +103,22 @@ function getReleaseByTagName(github, owner, repo, tag) {
     });
 }
 exports.getReleaseByTagName = getReleaseByTagName;
+function getDraftReleaseByTagName(github, owner, repo, tag) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            core_1.debug(`Trying to fetch draft release for tag ${tag}`);
+            const release = (yield github.repos.listReleases({ owner, repo })).data.find((listItem) => listItem.draft === true && listItem.tag_name === tag);
+            if (!release) {
+                throw new Error();
+            }
+            return release;
+        }
+        catch (e) {
+            throw new Error(`Could not find release for tag ${tag}.`);
+        }
+    });
+}
+exports.getDraftReleaseByTagName = getDraftReleaseByTagName;
 
 
 /***/ }),
