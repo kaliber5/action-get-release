@@ -2,6 +2,9 @@ name: 'Get Release Info'
 description: 'Get a latest release or by tag, including draft releases'
 author: 'Simon Ihmig'
 inputs:
+  token:
+    description: The Github token used for authentication, usually ${{ secrets.GITHUB_TOKEN }}
+    required: true
   owner:
     description: Name of the owner of the repo, taken from current repo by default.
     required: false
@@ -14,8 +17,8 @@ inputs:
   latest:
     description: Will fetch the latest release if set to true.
     required: false
-  debug:
-    description: Show ouputs
+  draft:
+    description: Set to true if you are looking for an unpublished draft release
     required: false
 outputs:
   id:

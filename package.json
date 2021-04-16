@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
+  "name": "action-get-release",
   "version": "0.0.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "Get a Github release",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -22,10 +22,11 @@
     "node",
     "setup"
   ],
-  "author": "",
+  "author": "Simon Ihmig <simon.ihmig@kaliber5.de>",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.7"
+    "@actions/core": "^1.2.7",
+    "@actions/github": "^4.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.22",

@@ -1,16 +1,40 @@
-import { getInput, debug, setOutput, setFailed } from '@actions/core';
-import { wait } from './wait';
+import { setFailed, setOutput, warning } from '@actions/core';
+import { getOctokit } from '@actions/github';
+import { getInputs, mapResponseToReleaseOutput } from './utils';
+import { Release } from './types';
+import { getLatestRelease, getReleaseByTagName } from './release';
 
 async function run(): Promise<void> {
   try {
-    const ms: string = getInput('milliseconds');
-    debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+    const { token, owner, repo, tag_name, latest, draft } = getInputs();
+    const octokit = getOctokit(token);
 
-    debug(new Date().toTimeString());
-    await wait(parseInt(ms, 10));
-    debug(new Date().toTimeString());
+    if (tag_name && latest) {
+      warning('Cannot use both tag_name and latest, ignoring tag_name!');
+    }
 
-    setOutput('time', new Date().toTimeString());
+    if (draft && latest) {
+      warning('Cannot get latest release with draft=true, ignoring draft');
+    }
+
+    let release: Release;
+
+    if (latest) {
+      release = await getLatestRelease(octokit, owner, repo);
+    } else if (tag_name) {
+      if (draft) {
+        throw new Error('not supported yet');
+      } else {
+        release = await getReleaseByTagName(octokit, owner, repo, tag_name);
+      }
+    } else {
+      throw new Error('Neither tag_name nor latest is set.');
+    }
+
+    const output = mapResponseToReleaseOutput(release);
+    for (const [key, value] of Object.entries(output)) {
+      setOutput(key, value);
+    }
   } catch (error) {
     setFailed(error instanceof Error ? error.message : error);
   }
