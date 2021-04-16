@@ -1,28 +1,66 @@
-import { wait } from '../src/wait';
-import * as process from 'process';
-import * as cp from 'child_process';
-import * as path from 'path';
+// @ts-ignore
+import { run } from '@jonabc/actions-mocks';
+import path from 'path';
+import fs from 'fs';
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10);
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number');
-});
+const script = path.join(__dirname, '../lib/main');
+const env = {
+  GITHUB_REPOSITORY: 'foo/bar',
+  INPUT_TOKEN: 'dummy',
+};
 
-test('wait 500 ms', async () => {
-  const start = new Date();
-  await wait(500);
-  const end = new Date();
-  var delta = Math.abs(end.getTime() - start.getTime());
-  expect(delta).toBeGreaterThan(450);
-});
+function parseOutput(raw: string): Record<string, string> {
+  return raw
+    .split('\n')
+    .filter((line) => line.match(/^::set-output/))
+    .map((line) => line.replace('::set-output name=', '').split('::'))
+    .reduce((result, [key, value]) => ({ ...result, [key]: value }), {});
+}
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500';
-  const np = process.execPath;
-  const ip = path.join(__dirname, '..', 'lib', 'main.js');
-  const options: cp.ExecFileSyncOptions = {
-    env: process.env,
-  };
-  console.log(cp.execFileSync(np, [ip], options).toString());
+describe('main', function () {
+  test('can fetch latest release', async () => {
+    const mocks = {
+      github: [
+        {
+          method: 'GET',
+          uri: '/repos/foo/bar/releases/latest',
+          file: path.join(__dirname, 'fixtures/api/latest.json'),
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+          },
+        },
+      ],
+    };
+
+    const { out, status } = await run(script, { env: { ...env, INPUT_LATEST: 'true' }, mocks });
+    const output = parseOutput(out);
+
+    expect(status).toEqual(0);
+    expect(output).toEqual(
+      JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/output/latest.json'), { encoding: 'utf-8' }))
+    );
+  });
+
+  test('can fetch release by tag', async () => {
+    const mocks = {
+      github: [
+        {
+          method: 'GET',
+          uri: '/repos/foo/bar/releases/tags/v1.0.0',
+          file: path.join(__dirname, 'fixtures/api/tag.json'),
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+          },
+        },
+      ],
+    };
+
+    const { out, status } = await run(script, { env: { ...env, INPUT_TAG_NAME: 'v1.0.0' }, mocks });
+    const output = parseOutput(out);
+
+    expect(status).toEqual(0);
+    expect(output).toEqual(
+      JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/output/tag.json'), { encoding: 'utf-8' }))
+    );
+  });
 });
