@@ -24,7 +24,7 @@ describe('main', function () {
         {
           method: 'GET',
           uri: '/repos/foo/bar/releases/latest',
-          file: path.join(__dirname, 'fixtures/api/latest.json'),
+          file: path.join(__dirname, 'fixtures/api/single.json'),
           headers: {
             'content-type': 'application/json; charset=utf-8',
           },
@@ -41,13 +41,36 @@ describe('main', function () {
     );
   });
 
+  test('can fetch release by id', async () => {
+    const mocks = {
+      github: [
+        {
+          method: 'GET',
+          uri: '/repos/foo/bar/releases/1',
+          file: path.join(__dirname, 'fixtures/api/single.json'),
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+          },
+        },
+      ],
+    };
+
+    const { out, status } = await run(script, { env: { ...env, INPUT_ID: '1' }, mocks });
+    const output = parseOutput(out);
+
+    expect(status).toEqual(0);
+    expect(output).toEqual(
+      JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/output/id.json'), { encoding: 'utf-8' }))
+    );
+  });
+
   test('can fetch release by tag', async () => {
     const mocks = {
       github: [
         {
           method: 'GET',
           uri: '/repos/foo/bar/releases/tags/v1.0.0',
-          file: path.join(__dirname, 'fixtures/api/tag.json'),
+          file: path.join(__dirname, 'fixtures/api/single.json'),
           headers: {
             'content-type': 'application/json; charset=utf-8',
           },

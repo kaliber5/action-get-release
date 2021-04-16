@@ -37,6 +37,7 @@ export function getInputs(): Inputs {
     token: getNormalizedInput('token', { required: true }),
     owner: getNormalizedInput('owner', { default: context.repo.owner }),
     repo: getNormalizedInput('repo', { default: context.repo.repo }),
+    id: getNormalizedInput('id'),
     tag_name: getNormalizedInput('tag_name', { default: defaultTag }),
     latest: getNormalizedInput('latest', { default: false }),
     draft: getNormalizedInput('draft', { default: false }),

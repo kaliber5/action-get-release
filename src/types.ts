@@ -7,6 +7,7 @@ export interface Inputs {
   token: string;
   owner: string;
   repo: string;
+  id?: string;
   tag_name?: string;
   latest: boolean;
   draft: boolean;

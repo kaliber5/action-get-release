@@ -19,6 +19,15 @@ export async function getReleaseByTagName(github: Octokit, owner: string, repo: 
   }
 }
 
+export async function getReleaseById(github: Octokit, owner: string, repo: string, id: string): Promise<Release> {
+  try {
+    debug(`Trying to fetch release for ID ${id}`);
+    return (await github.repos.getRelease({ owner, repo, release_id: parseInt(id, 10) })).data;
+  } catch (e) {
+    throw new Error(`Could not find release for ID ${id}.`);
+  }
+}
+
 export async function getDraftReleaseByTagName(
   github: Octokit,
   owner: string,

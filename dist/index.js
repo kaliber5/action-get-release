@@ -24,10 +24,16 @@ const release_1 = __webpack_require__(878);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { token, owner, repo, tag_name, latest, draft } = utils_1.getInputs();
+            const { token, owner, repo, id, tag_name, latest, draft } = utils_1.getInputs();
             const octokit = github_1.getOctokit(token);
             if (tag_name && latest) {
-                core_1.warning('Cannot use both tag_name and latest, ignoring tag_name!');
+                core_1.warning('Cannot use both latest and tag_name, ignoring tag_name!');
+            }
+            if (id && latest) {
+                core_1.warning('Cannot use both latest and id, ignoring id!');
+            }
+            if (id && tag_name) {
+                core_1.warning('Cannot use both id and tag_name, ignoring tag_name!');
             }
             if (draft && latest) {
                 core_1.warning('Cannot get latest release with draft=true, ignoring draft');
@@ -35,6 +41,9 @@ function run() {
             let release;
             if (latest) {
                 release = yield release_1.getLatestRelease(octokit, owner, repo);
+            }
+            else if (id) {
+                release = yield release_1.getReleaseById(octokit, owner, repo, id);
             }
             else if (tag_name) {
                 if (draft) {
@@ -77,7 +86,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDraftReleaseByTagName = exports.getReleaseByTagName = exports.getLatestRelease = void 0;
+exports.getDraftReleaseByTagName = exports.getReleaseById = exports.getReleaseByTagName = exports.getLatestRelease = void 0;
 const core_1 = __webpack_require__(186);
 function getLatestRelease(github, owner, repo) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -103,6 +112,18 @@ function getReleaseByTagName(github, owner, repo, tag) {
     });
 }
 exports.getReleaseByTagName = getReleaseByTagName;
+function getReleaseById(github, owner, repo, id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            core_1.debug(`Trying to fetch release for ID ${id}`);
+            return (yield github.repos.getRelease({ owner, repo, release_id: parseInt(id, 10) })).data;
+        }
+        catch (e) {
+            throw new Error(`Could not find release for ID ${id}.`);
+        }
+    });
+}
+exports.getReleaseById = getReleaseById;
 function getDraftReleaseByTagName(github, owner, repo, tag) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -154,6 +175,7 @@ function getInputs() {
         token: getNormalizedInput('token', { required: true }),
         owner: getNormalizedInput('owner', { default: github_1.context.repo.owner }),
         repo: getNormalizedInput('repo', { default: github_1.context.repo.repo }),
+        id: getNormalizedInput('id'),
         tag_name: getNormalizedInput('tag_name', { default: defaultTag }),
         latest: getNormalizedInput('latest', { default: false }),
         draft: getNormalizedInput('draft', { default: false }),

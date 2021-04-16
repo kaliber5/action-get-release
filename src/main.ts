@@ -2,15 +2,23 @@ import { setFailed, setOutput, warning } from '@actions/core';
 import { getOctokit } from '@actions/github';
 import { getInputs, mapResponseToReleaseOutput } from './utils';
 import { Release } from './types';
-import { getDraftReleaseByTagName, getLatestRelease, getReleaseByTagName } from './release';
+import { getDraftReleaseByTagName, getLatestRelease, getReleaseById, getReleaseByTagName } from './release';
 
 async function run(): Promise<void> {
   try {
-    const { token, owner, repo, tag_name, latest, draft } = getInputs();
+    const { token, owner, repo, id, tag_name, latest, draft } = getInputs();
     const octokit = getOctokit(token);
 
     if (tag_name && latest) {
-      warning('Cannot use both tag_name and latest, ignoring tag_name!');
+      warning('Cannot use both latest and tag_name, ignoring tag_name!');
+    }
+
+    if (id && latest) {
+      warning('Cannot use both latest and id, ignoring id!');
+    }
+
+    if (id && tag_name) {
+      warning('Cannot use both id and tag_name, ignoring tag_name!');
     }
 
     if (draft && latest) {
@@ -21,6 +29,8 @@ async function run(): Promise<void> {
 
     if (latest) {
       release = await getLatestRelease(octokit, owner, repo);
+    } else if (id) {
+      release = await getReleaseById(octokit, owner, repo, id);
     } else if (tag_name) {
       if (draft) {
         release = await getDraftReleaseByTagName(octokit, owner, repo, tag_name);
