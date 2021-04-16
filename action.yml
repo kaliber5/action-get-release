@@ -1,11 +1,50 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Get Release Info'
+description: 'Get a latest release or by tag, including draft releases'
+author: 'Simon Ihmig'
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  owner:
+    description: Name of the owner of the repo, taken from current repo by default.
+    required: false
+  repo:
+    description: Name of the repository, taken from current repo by default.
+    required: false
+  tag_name:
+    description: Tag name to identify the release.
+    required: false
+  latest:
+    description: Will fetch the latest release if set to true.
+    required: false
+  debug:
+    description: Show ouputs
+    required: false
+outputs:
+  id:
+    description: The ID of the Release
+  url:
+    description: The release url
+  html_url:
+    description: The url users can navigate to in order to view the release
+  assets_url:
+    description: The release assets url
+  upload_url:
+    description: The url for uploading assets to the release
+  name:
+    description: The release name
+  tag_name:
+    description: The git tag associated with the release
+  draft:
+    description: Is draft
+  prerelease:
+    description: Is pre-release
+  target_commitish:
+    description: The release was create to which target branch
+  created_at:
+    description: Created date
+  published_at:
+    description: Published date
 runs:
   using: 'node12'
   main: 'dist/index.js'
+branding:
+  icon: tag
+  color: orange
