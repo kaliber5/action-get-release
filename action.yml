@@ -3,7 +3,7 @@ description: 'Get a latest release or by tag, including draft releases'
 author: 'Simon Ihmig'
 inputs:
   token:
-    description: The Github token used for authentication, usually ${{ secrets.GITHUB_TOKEN }}
+    description: The Github token used for authentication.
     required: true
   owner:
     description: Name of the owner of the repo, taken from current repo by default.
